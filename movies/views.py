@@ -1,5 +1,8 @@
 from datetime import date
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from movies.forms import CommentForm
 
 from movies.models import Movie
 
@@ -76,10 +79,21 @@ def movies(request):
 
 def movie_details(request, slug):
     movie = get_object_or_404(Movie,slug=slug)
+    comment_form = CommentForm()
+
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.movie = movie
+            comment.save()
+            return HttpResponseRedirect(reverse("movie_details", args=[slug]))
 
     return render(request, 'movie-details.html', {
         "movie": movie,
         "genres": movie.genres.all(),
         "people": movie.people.all(),
-        "videos": movie.video_set.all()
+        "videos": movie.video_set.all(),
+        "comments": movie.comments.all().order_by("-date_added"),
+        "comment_form": comment_form
 })

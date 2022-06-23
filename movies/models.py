@@ -1,8 +1,7 @@
 import imp
 from pydoc import describe
 from django.db import models
-from django.core.validators import MinLengthValidator
-
+from ckeditor.fields import RichTextField
 
 class Contact(models.Model):
     address = models.CharField(max_length=200)
@@ -54,9 +53,9 @@ class Person(models.Model):
 
 class Movie(models.Model):
     title = models.CharField("Title",max_length=100)
-    describe = models.TextField("Describe",validators=[MinLengthValidator(20)])
-    image_name = models.CharField(max_length=50)
-    image_cover = models.CharField(max_length=50)
+    describe = RichTextField()
+    image_name = models.ImageField(upload_to="movies")
+    image_cover = models.ImageField(upload_to="movies")
     date= models.DateField()
     slug = models.SlugField(unique=True, db_index=True)
     budget = models.DecimalField(max_digits=19,decimal_places=2)
@@ -72,6 +71,15 @@ class Movie(models.Model):
     
     def __str__(self):
         return self.title
+
+class Comment(models.Model):
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField(default="")
+    text = models.TextField(max_length=500)
+    rating = models.IntegerField(null=True)
+    date_added = models.DateTimeField(null=True,auto_now=True)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="comments")
+
 
 class Video(models.Model):
     title = models.CharField(max_length=200)
