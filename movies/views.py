@@ -1,71 +1,13 @@
 from datetime import date
-from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
 from movies.forms import CommentForm
-
-from movies.models import Movie
-
-data = {
-    "movies": [
-        {
-            "title": "film adı 1",
-            "description": "film açıklama 1",
-            "imageUrl": "m1.jpg",
-            "coverImage": "cover1.jpg",
-            "slug": "film-adi-1",
-            "language": "english",
-            "date": date(2021,10,10)
-        },
-        {
-            "title": "film adı 2",
-            "description": "film açıklama 2",
-            "imageUrl": "m2.jpg",
-            "coverImage": "cover2.jpg",
-            "slug": "film-adi-2",
-            "language": "english",
-            "date": date(2021,5,10)
-        },
-        {
-            "title": "film adı 3",
-            "description": "film açıklama 3",
-            "imageUrl": "m3.jpg",
-            "coverImage": "cover3.jpg",
-            "slug": "film-adi-3",
-            "language": "english",
-            "date": date(2021,10,5)
-        },
-        {
-            "title": "film adı 4",
-            "description": "film açıklama 4",
-            "imageUrl": "m4.jpg",
-            "coverImage": "cover1.jpg",
-            "slug": "film-adi-4",
-            "language": "english",
-            "date": date(2020,10,5)
-        }
-    ],
-    "sliders": [
-        {
-            "slider_image": "slider1.jpg",
-            "url": "film-adi-1"
-        },
-         {
-            "slider_image": "slider2.jpg",
-            "url": "film-adi-2"
-        },
-         {
-            "slider_image": "slider3.jpg",
-            "url": "film-adi-3"
-        }
-    ]
-}
-
-# Create your views here.
+from django.http.response import HttpResponseRedirect
+from movies.models import Movie, Slider
+from django.urls import reverse
 
 def index(request):
     movies = Movie.objects.filter(is_active=True,is_home=True)
-    sliders = data["sliders"]
+    sliders = Slider.objects.filter(is_active=True)
     return render(request, 'index.html', {
         "movies": movies,
         "sliders": sliders
@@ -78,7 +20,7 @@ def movies(request):
     })
 
 def movie_details(request, slug):
-    movie = get_object_or_404(Movie,slug=slug)
+    movie = get_object_or_404(Movie, slug=slug)
     comment_form = CommentForm()
 
     if request.method == "POST":
@@ -88,6 +30,7 @@ def movie_details(request, slug):
             comment.movie = movie
             comment.save()
             return HttpResponseRedirect(reverse("movie_details", args=[slug]))
+
 
     return render(request, 'movie-details.html', {
         "movie": movie,
